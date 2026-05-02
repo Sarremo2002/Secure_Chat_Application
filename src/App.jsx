@@ -33,7 +33,7 @@ export default function App() {
     })();
   }, []);
 
-  // Alice sends a message → encrypt → Bob decrypts
+  // Alice sends a message → encrypt → show "decrypting..." on Bob → reveal
   const handleAliceSend = async (plaintext) => {
     if (!cryptoKey) return;
     const time = now();
@@ -47,12 +47,20 @@ export default function App() {
     // Log the encrypted data in the network panel
     setNetworkLog(prev => [...prev, { from: "Alice", to: "Bob", ciphertext, iv }]);
 
-    // Bob decrypts and sees the message (received)
-    const decrypted = await decryptMessage(cryptoKey, ciphertext, iv);
-    setBobMsgs(prev => [...prev, { text: decrypted, time, variant: "alice-recv" }]);
+    // Show "decrypting..." placeholder on Bob's side
+    const placeholderId = Date.now();
+    setBobMsgs(prev => [...prev, { id: placeholderId, text: "", time, variant: "alice-recv", isDecrypting: true }]);
+
+    // After 600ms delay, decrypt and reveal the real message
+    setTimeout(async () => {
+      const decrypted = await decryptMessage(cryptoKey, ciphertext, iv);
+      setBobMsgs(prev =>
+        prev.map(m => m.id === placeholderId ? { ...m, text: decrypted, isDecrypting: false } : m)
+      );
+    }, 600);
   };
 
-  // Bob sends a message → encrypt → Alice decrypts
+  // Bob sends a message → encrypt → show "decrypting..." on Alice → reveal
   const handleBobSend = async (plaintext) => {
     if (!cryptoKey) return;
     const time = now();
@@ -66,9 +74,17 @@ export default function App() {
     // Log the encrypted data in the network panel
     setNetworkLog(prev => [...prev, { from: "Bob", to: "Alice", ciphertext, iv }]);
 
-    // Alice decrypts and sees the message (received)
-    const decrypted = await decryptMessage(cryptoKey, ciphertext, iv);
-    setAliceMsgs(prev => [...prev, { text: decrypted, time, variant: "bob-recv" }]);
+    // Show "decrypting..." placeholder on Alice's side
+    const placeholderId = Date.now();
+    setAliceMsgs(prev => [...prev, { id: placeholderId, text: "", time, variant: "bob-recv", isDecrypting: true }]);
+
+    // After 600ms delay, decrypt and reveal the real message
+    setTimeout(async () => {
+      const decrypted = await decryptMessage(cryptoKey, ciphertext, iv);
+      setAliceMsgs(prev =>
+        prev.map(m => m.id === placeholderId ? { ...m, text: decrypted, isDecrypting: false } : m)
+      );
+    }, 600);
   };
 
   return (

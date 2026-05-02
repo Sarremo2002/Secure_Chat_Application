@@ -10,11 +10,19 @@
   --color-accent:        #6c5ce7;
   --color-accent-glow:   rgba(108, 92, 231, .25);
 
-  /* Alice & Bob palette */
-  --color-alice:         #00cec9;
-  --color-alice-bg:      rgba(0, 206, 201, .12);
-  --color-bob:           #fd79a8;
-  --color-bob-bg:        rgba(253, 121, 168, .12);
+  /* Alice palette — purple sent bubbles */
+  --color-alice-sent:    #6c5ce7;
+  --color-alice-sent-text: #ffffff;
+  --color-alice-recv:    rgba(0, 206, 201, .15);
+  --color-alice-recv-border: rgba(0, 206, 201, .25);
+  --color-alice-avatar:  #6c5ce7;
+
+  /* Bob palette — teal sent bubbles */
+  --color-bob-sent:      #00cec9;
+  --color-bob-sent-text: #0d2626;
+  --color-bob-recv:      rgba(108, 92, 231, .12);
+  --color-bob-recv-border: rgba(108, 92, 231, .22);
+  --color-bob-avatar:    #00cec9;
 
   /* Network log */
   --color-network:       #fdcb6e;
@@ -133,6 +141,32 @@ html, body, #root {
   white-space: nowrap;
   max-width: 520px;
   border: 1px solid rgba(108,92,231,.18);
+  transition: opacity var(--duration) var(--ease);
+}
+.key-display__toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: .7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  white-space: nowrap;
+}
+.key-display__toggle:hover {
+  background: var(--color-accent-glow);
+  color: var(--color-accent);
+  border-color: rgba(108,92,231,.35);
+}
+.key-display__eye {
+  font-size: .85rem;
+  line-height: 1;
 }
 
 /* ── Chat Area ────────────────────────────────────────────────────────── */
@@ -166,8 +200,8 @@ html, body, #root {
   font-weight: 700; font-size: .8rem;
   color: #fff;
 }
-.chat-panel__avatar--alice { background: var(--color-alice); }
-.chat-panel__avatar--bob   { background: var(--color-bob); }
+.chat-panel__avatar--alice { background: var(--color-alice-avatar); }
+.chat-panel__avatar--bob   { background: var(--color-bob-avatar); }
 
 .chat-panel__name {
   font-weight: 600;
@@ -263,16 +297,49 @@ html, body, #root {
   align-self: flex-start;
   border-bottom-left-radius: 4px;
 }
-.message-bubble--alice-sent  { background: var(--color-alice); color: #0d2626; }
-.message-bubble--alice-recv  { background: var(--color-alice-bg); color: var(--color-text); border: 1px solid rgba(0,206,201,.18); }
-.message-bubble--bob-sent    { background: var(--color-bob); color: #2d0f1a; }
-.message-bubble--bob-recv    { background: var(--color-bob-bg); color: var(--color-text); border: 1px solid rgba(253,121,168,.18); }
+.message-bubble--alice-sent  { background: var(--color-alice-sent); color: var(--color-alice-sent-text); }
+.message-bubble--alice-recv  { background: var(--color-alice-recv); color: var(--color-text); border: 1px solid var(--color-alice-recv-border); }
+.message-bubble--bob-sent    { background: var(--color-bob-sent); color: var(--color-bob-sent-text); }
+.message-bubble--bob-recv    { background: var(--color-bob-recv); color: var(--color-text); border: 1px solid var(--color-bob-recv-border); }
 
+/* Meta row: crypto label + timestamp */
+.message-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 5px;
+}
+.message-bubble__crypto-label {
+  font-size: .62rem;
+  font-weight: 600;
+  opacity: .65;
+  white-space: nowrap;
+}
 .message-bubble__time {
-  font-size: .65rem;
-  opacity: .6;
-  margin-top: 4px;
-  text-align: right;
+  font-size: .62rem;
+  opacity: .5;
+  white-space: nowrap;
+}
+
+/* Decrypting animation state */
+.message-bubble__decrypting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .82rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+.message-bubble__spinner {
+  width: 14px; height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes bubbleIn {

@@ -37,7 +37,13 @@ export default function ChatPanel({ user, messages, onSend }) {
       {/* Messages list */}
       <div className="chat-panel__messages" ref={listRef}>
         {messages.map((msg, i) => (
-          <MessageBubble key={i} text={msg.text} time={msg.time} variant={msg.variant} />
+          <MessageBubble
+            key={i}
+            text={msg.text}
+            time={msg.time}
+            variant={msg.variant}
+            isDecrypting={msg.isDecrypting}
+          />
         ))}
       </div>
 
