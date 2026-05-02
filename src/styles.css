@@ -301,6 +301,24 @@ html, body, #root {
 .message-bubble--alice-recv  { background: var(--color-alice-recv); color: var(--color-text); border: 1px solid var(--color-alice-recv-border); }
 .message-bubble--bob-sent    { background: var(--color-bob-sent); color: var(--color-bob-sent-text); }
 .message-bubble--bob-recv    { background: var(--color-bob-recv); color: var(--color-text); border: 1px solid var(--color-bob-recv-border); }
+.message-bubble--tamper-error {
+  background: rgba(255, 71, 87, 0.15);
+  color: #ff4757;
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+.message-bubble--tamper-warning {
+  background: rgba(253, 203, 110, 0.15);
+  color: #fdcb6e;
+  border: 1px solid rgba(253, 203, 110, 0.4);
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
 
 /* Meta row: crypto label + timestamp */
 .message-bubble__meta {
@@ -315,6 +333,12 @@ html, body, #root {
   font-weight: 600;
   opacity: .65;
   white-space: nowrap;
+}
+.message-bubble__tamper-desc {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  margin-top: 6px;
+  line-height: 1.3;
 }
 .message-bubble__time {
   font-size: .62rem;
@@ -407,6 +431,17 @@ html, body, #root {
   word-break: break-all;
 }
 .network-log__entry span { color: var(--color-network); font-weight: 600; }
+
+.network-log__entry--tampered {
+  background: rgba(255, 71, 87, 0.1);
+  border-color: rgba(255, 71, 87, 0.4);
+  color: #ff4757;
+}
+.network-log__tamper-tag {
+  color: #ff4757 !important;
+  font-weight: bold;
+}
+
 .network-log__empty {
   color: var(--color-text-muted);
   font-size: .78rem;
@@ -415,7 +450,153 @@ html, body, #root {
   opacity: .5;
 }
 
+/* Tamper controls */
+.network-log__actions {
+  padding: var(--space-sm) var(--space-xl);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: flex-end;
+}
+.network-log__tamper-btn, .network-log__reset-btn {
+  background: transparent;
+  border: 1px solid;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  font-family: var(--font-sans);
+}
+.network-log__tamper-btn {
+  color: #ff4757;
+  border-color: rgba(255, 71, 87, 0.4);
+}
+.network-log__tamper-btn:hover:not(:disabled) {
+  background: rgba(255, 71, 87, 0.1);
+  border-color: #ff4757;
+}
+.network-log__tamper-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+.network-log__reset-btn {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.network-log__reset-btn:hover {
+  background: var(--color-surface-alt);
+}
+
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(-10px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Tamper Modal ─────────────────────────────────────────────────────── */
+.tamper-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+.red-flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 71, 87, 0.4);
+  z-index: 200;
+  pointer-events: none;
+  animation: flashFade 1s ease-out forwards;
+}
+@keyframes flashFade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.tamper-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  z-index: 101;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+}
+.tamper-modal__title {
+  margin-bottom: var(--space-md);
+  font-size: 1.2rem;
+  color: #ff4757;
+  text-align: center;
+}
+.tamper-step {
+  display: flex;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+.tamper-step.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.tamper-step__icon {
+  font-size: 1.5rem;
+}
+.tamper-step__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tamper-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--color-bg);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+  border: 1px solid var(--color-border);
+}
+.tamper-code.tampered {
+  border-color: rgba(255, 71, 87, 0.4);
+  background: rgba(255, 71, 87, 0.05);
+}
+.tamper-diff {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 4px 0;
+}
+.tamper-char-orig {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+.tamper-char-new, .tamper-highlight-red, .network-log__highlight-red {
+  color: #ff4757;
+  font-weight: bold;
+}
+.tamper-failed {
+  color: #ff4757;
+  font-size: 1.1rem;
+  margin-top: 4px;
+}
+.tamper-spinner-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--color-text-muted);
+}
+.network-log__tamper-compare {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: var(--font-mono);
 }
